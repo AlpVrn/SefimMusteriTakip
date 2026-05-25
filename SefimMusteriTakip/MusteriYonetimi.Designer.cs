@@ -50,12 +50,20 @@
             btn_Temizle = new Button();
             label8 = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
+            txt_VKNTC = new TextBox();
+            label9 = new Label();
+            groupBox1 = new GroupBox();
+            rd_btn_Satici = new RadioButton();
+            rd_btn_Alici = new RadioButton();
+            textBox2 = new TextBox();
+            label10 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // txtbox_SirketSahipAd
             // 
-            txtbox_SirketSahipAd.Location = new Point(166, 49);
+            txtbox_SirketSahipAd.Location = new Point(297, 45);
             txtbox_SirketSahipAd.Name = "txtbox_SirketSahipAd";
             txtbox_SirketSahipAd.Size = new Size(191, 27);
             txtbox_SirketSahipAd.TabIndex = 0;
@@ -63,7 +71,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(27, 55);
+            label1.Location = new Point(158, 51);
             label1.Name = "label1";
             label1.Size = new Size(118, 20);
             label1.TabIndex = 1;
@@ -72,7 +80,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(417, 52);
+            label2.Location = new Point(548, 48);
             label2.Name = "label2";
             label2.Size = new Size(73, 20);
             label2.TabIndex = 3;
@@ -80,7 +88,7 @@
             // 
             // txtbox_SirketAdi
             // 
-            txtbox_SirketAdi.Location = new Point(496, 49);
+            txtbox_SirketAdi.Location = new Point(665, 45);
             txtbox_SirketAdi.Name = "txtbox_SirketAdi";
             txtbox_SirketAdi.Size = new Size(192, 27);
             txtbox_SirketAdi.TabIndex = 2;
@@ -88,7 +96,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(417, 85);
+            label3.Location = new Point(548, 81);
             label3.Name = "label3";
             label3.Size = new Size(52, 20);
             label3.TabIndex = 5;
@@ -96,7 +104,7 @@
             // 
             // txtbox_mail
             // 
-            txtbox_mail.Location = new Point(498, 82);
+            txtbox_mail.Location = new Point(667, 78);
             txtbox_mail.Name = "txtbox_mail";
             txtbox_mail.Size = new Size(190, 27);
             txtbox_mail.TabIndex = 4;
@@ -104,7 +112,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(733, 56);
+            label4.Location = new Point(548, 126);
             label4.Name = "label4";
             label4.Size = new Size(64, 20);
             label4.TabIndex = 7;
@@ -113,7 +121,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(733, 85);
+            label5.Location = new Point(881, 81);
             label5.Name = "label5";
             label5.Size = new Size(58, 20);
             label5.TabIndex = 9;
@@ -122,7 +130,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(31, 82);
+            label6.Location = new Point(546, 167);
             label6.Name = "label6";
             label6.Size = new Size(111, 20);
             label6.TabIndex = 11;
@@ -131,7 +139,7 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(27, 134);
+            label7.Location = new Point(158, 81);
             label7.Name = "label7";
             label7.Size = new Size(83, 20);
             label7.TabIndex = 13;
@@ -139,7 +147,7 @@
             // 
             // mtxtbox_TelNo
             // 
-            mtxtbox_TelNo.Location = new Point(805, 82);
+            mtxtbox_TelNo.Location = new Point(953, 78);
             mtxtbox_TelNo.Mask = "(999) 000-0000";
             mtxtbox_TelNo.Name = "mtxtbox_TelNo";
             mtxtbox_TelNo.Size = new Size(116, 27);
@@ -147,7 +155,7 @@
             // 
             // mtxtbox_Anydesk
             // 
-            mtxtbox_Anydesk.Location = new Point(805, 49);
+            mtxtbox_Anydesk.Location = new Point(667, 123);
             mtxtbox_Anydesk.Mask = "0 000 000 000";
             mtxtbox_Anydesk.Name = "mtxtbox_Anydesk";
             mtxtbox_Anydesk.Size = new Size(116, 27);
@@ -157,17 +165,17 @@
             // 
             dtimepicker_Sozlesme_Tarihi.Checked = false;
             dtimepicker_Sozlesme_Tarihi.Format = DateTimePickerFormat.Short;
-            dtimepicker_Sozlesme_Tarihi.Location = new Point(166, 82);
+            dtimepicker_Sozlesme_Tarihi.Location = new Point(667, 167);
             dtimepicker_Sozlesme_Tarihi.Name = "dtimepicker_Sozlesme_Tarihi";
-            dtimepicker_Sozlesme_Tarihi.Size = new Size(191, 27);
+            dtimepicker_Sozlesme_Tarihi.Size = new Size(119, 27);
             dtimepicker_Sozlesme_Tarihi.TabIndex = 16;
             dtimepicker_Sozlesme_Tarihi.Value = new DateTime(2026, 5, 7, 14, 52, 45, 0);
             // 
             // rtxtbox_Adres
             // 
-            rtxtbox_Adres.Location = new Point(166, 134);
+            rtxtbox_Adres.Location = new Point(297, 81);
             rtxtbox_Adres.Name = "rtxtbox_Adres";
-            rtxtbox_Adres.Size = new Size(213, 80);
+            rtxtbox_Adres.Size = new Size(191, 106);
             rtxtbox_Adres.TabIndex = 17;
             rtxtbox_Adres.Text = "";
             // 
@@ -175,17 +183,17 @@
             // 
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(2, 291);
+            dataGridView1.Location = new Point(-2, 383);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(1148, 249);
+            dataGridView1.Size = new Size(1148, 312);
             dataGridView1.TabIndex = 18;
             dataGridView1.CellClick += dataGridView1_CellClick;
             // 
             // btn_Ekle
             // 
-            btn_Ekle.Location = new Point(497, 185);
+            btn_Ekle.Location = new Point(650, 223);
             btn_Ekle.Name = "btn_Ekle";
             btn_Ekle.Size = new Size(94, 29);
             btn_Ekle.TabIndex = 19;
@@ -195,7 +203,7 @@
             // 
             // btn_Sil
             // 
-            btn_Sil.Location = new Point(599, 185);
+            btn_Sil.Location = new Point(752, 223);
             btn_Sil.Name = "btn_Sil";
             btn_Sil.Size = new Size(94, 29);
             btn_Sil.TabIndex = 20;
@@ -205,7 +213,7 @@
             // 
             // btn_Guncelle
             // 
-            btn_Guncelle.Location = new Point(701, 185);
+            btn_Guncelle.Location = new Point(854, 223);
             btn_Guncelle.Name = "btn_Guncelle";
             btn_Guncelle.Size = new Size(94, 29);
             btn_Guncelle.TabIndex = 21;
@@ -215,7 +223,7 @@
             // 
             // btn_Temizle
             // 
-            btn_Temizle.Location = new Point(805, 185);
+            btn_Temizle.Location = new Point(958, 223);
             btn_Temizle.Name = "btn_Temizle";
             btn_Temizle.Size = new Size(94, 29);
             btn_Temizle.TabIndex = 22;
@@ -236,12 +244,84 @@
             // 
             timer1.Tick += timer1_Tick;
             // 
+            // txt_VKNTC
+            // 
+            txt_VKNTC.Location = new Point(944, 48);
+            txt_VKNTC.Name = "txt_VKNTC";
+            txt_VKNTC.Size = new Size(125, 27);
+            txt_VKNTC.TabIndex = 24;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(878, 48);
+            label9.Name = "label9";
+            label9.Size = new Size(60, 20);
+            label9.TabIndex = 0;
+            label9.Text = "VKN/TC";
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(rd_btn_Satici);
+            groupBox1.Controls.Add(rd_btn_Alici);
+            groupBox1.Location = new Point(12, 46);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(129, 101);
+            groupBox1.TabIndex = 25;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Cari Seçimi";
+            // 
+            // rd_btn_Satici
+            // 
+            rd_btn_Satici.AutoSize = true;
+            rd_btn_Satici.Location = new Point(6, 56);
+            rd_btn_Satici.Name = "rd_btn_Satici";
+            rd_btn_Satici.Size = new Size(66, 24);
+            rd_btn_Satici.TabIndex = 1;
+            rd_btn_Satici.Text = "Satıcı";
+            rd_btn_Satici.UseVisualStyleBackColor = true;
+            rd_btn_Satici.CheckedChanged += rd_btn_Satici_CheckedChanged;
+            // 
+            // rd_btn_Alici
+            // 
+            rd_btn_Alici.AutoSize = true;
+            rd_btn_Alici.Checked = true;
+            rd_btn_Alici.Location = new Point(6, 26);
+            rd_btn_Alici.Name = "rd_btn_Alici";
+            rd_btn_Alici.Size = new Size(59, 24);
+            rd_btn_Alici.TabIndex = 0;
+            rd_btn_Alici.TabStop = true;
+            rd_btn_Alici.Text = "Alıcı";
+            rd_btn_Alici.UseVisualStyleBackColor = true;
+            rd_btn_Alici.CheckedChanged += rd_btn_Alici_CheckedChanged;
+            // 
+            // textBox2
+            // 
+            textBox2.Location = new Point(500, 350);
+            textBox2.Name = "textBox2";
+            textBox2.Size = new Size(244, 27);
+            textBox2.TabIndex = 26;
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(462, 350);
+            label10.Name = "label10";
+            label10.Size = new Size(32, 20);
+            label10.TabIndex = 27;
+            label10.Text = "Ara";
+            // 
             // MusteriYonetimi
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
-            ClientSize = new Size(1138, 542);
+            ClientSize = new Size(1138, 696);
+            Controls.Add(label10);
+            Controls.Add(textBox2);
+            Controls.Add(groupBox1);
+            Controls.Add(label9);
+            Controls.Add(txt_VKNTC);
             Controls.Add(label8);
             Controls.Add(btn_Temizle);
             Controls.Add(btn_Guncelle);
@@ -269,6 +349,8 @@
             Text = "MusteriYonetimi";
             Load += MusteriYonetimi_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -296,5 +378,12 @@
         private Button btn_Temizle;
         private Label label8;
         private System.Windows.Forms.Timer timer1;
+        private TextBox txt_VKNTC;
+        private Label label9;
+        private GroupBox groupBox1;
+        private RadioButton rd_btn_Satici;
+        private RadioButton rd_btn_Alici;
+        private TextBox textBox2;
+        private Label label10;
     }
 }

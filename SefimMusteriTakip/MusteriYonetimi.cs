@@ -50,9 +50,20 @@ namespace SefimMusteriTakip
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    connection.Open();
 
-                    string query = "SELECT MusteriID, Sirket,Anydesk,FORMAT(SozlesmeTarihi, 'dd/MM/yyyy') AS SozlesmeTarihi,Ad,Adres,Telefon,Email,KayitTarihi, CASE WHEN DATEDIFF(year, SozlesmeTarihi, GETDATE()) >= 1 THEN 'Destek Verilemez' ELSE 'Destek Verilebilir' END AS Destek_Durumu FROM Musteriler WHERE Silindi = 0";
+                    string query = "";
+
+
+                    connection.Open();
+                    if (rd_btn_Alici.Checked)
+                    {
+                        query = "SELECT MusteriID, Sirket,Anydesk,FORMAT(SozlesmeTarihi, 'dd/MM/yyyy') AS SozlesmeTarihi,Ad,Adres,Telefon,Email,KayitTarihi, CASE WHEN DATEDIFF(year, SozlesmeTarihi, GETDATE()) >= 1 THEN 'Destek Verilemez' ELSE 'Destek Verilebilir' END AS Destek_Durumu FROM Musteriler WHERE Silindi = 0 AND CariTuru = 'S'";
+                    }
+                    else
+                    {
+                        query = "SELECT MusteriID,Sirket,Ad,TCVKN,Adres,Telefon,Email,KayitTarihi FROM Musteriler WHERE CariTuru = 'A' AND Silindi = 0";
+                    }
+
 
                     SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                     DataTable dataTable = new();
@@ -75,19 +86,35 @@ namespace SefimMusteriTakip
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-
-                    string query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, Anydesk, SozlesmeTarihi) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @Anydesk, @SozlesmeTarihi)";
-
+                    string query = "";
                     SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
-                    command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
-                    command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
-                    command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
-                    command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
-                    command.Parameters.AddWithValue("@Anydesk", mtxtbox_Anydesk.Text);
-                    command.Parameters.AddWithValue("@SozlesmeTarihi", dtimepicker_Sozlesme_Tarihi.Text);
+
+                    if (rd_btn_Alici.Checked)
+                    {
+                        query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, Anydesk, SozlesmeTarihi) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @Anydesk, @SozlesmeTarihi)";
+                        command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
+                        command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
+                        command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
+                        command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
+                        command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
+                        command.Parameters.AddWithValue("@Anydesk", mtxtbox_Anydesk.Text);
+                        command.Parameters.AddWithValue("@SozlesmeTarihi", dtimepicker_Sozlesme_Tarihi.Text);
+                        command.Parameters.AddWithValue("@CariTuru", "S");
+                    }
+
+                    else
+                    {
+                        query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, TCVKN, CariTuru) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @TCVKN, @CariTuru)";
+                        command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
+                        command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
+                        command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
+                        command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
+                        command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
+                        command.Parameters.AddWithValue("@TCVKN", txt_VKNTC.Text);
+                        command.Parameters.AddWithValue("@CariTuru", "A");
+                    }
                     command.ExecuteNonQuery();
-                    MessageBox.Show("Müşteri Eklendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Cari Eklendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     connection.Close();
                 }
             }
@@ -106,11 +133,11 @@ namespace SefimMusteriTakip
                     connection.Open();
 
                     string query = "UPDATE Musteriler SET " +
-                    "Ad = @Ad, "           +
-                    "Sirket = @Sirket, "   +
-                    "Email = @Email, "     +
+                    "Ad = @Ad, " +
+                    "Sirket = @Sirket, " +
+                    "Email = @Email, " +
                     "Telefon = @Telefon, " +
-                    "Adres = @Adres, "     +
+                    "Adres = @Adres, " +
                     "Anydesk = @Anydesk, " +
                     "SozlesmeTarihi = @SozlesmeTarihi " +
                     "WHERE MusteriID = @ID";
@@ -138,7 +165,7 @@ namespace SefimMusteriTakip
         private void DeleteData()
         {
             try
-            {   
+            {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -209,6 +236,30 @@ namespace SefimMusteriTakip
             UpdateData();
             ClearDataText();
             LoadData();
+        }
+
+        private void rd_btn_Alici_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rd_btn_Alici.Checked)
+            {
+                LoadData();
+                mtxtbox_Anydesk.Visible = true;
+                dtimepicker_Sozlesme_Tarihi.Visible = true;
+                label4.Visible = true;
+                label6.Visible = true;
+            }
+            else
+            {
+                LoadData();
+            }
+        }
+
+        private void rd_btn_Satici_CheckedChanged(object sender, EventArgs e)
+        {
+            mtxtbox_Anydesk.Visible = false;
+            dtimepicker_Sozlesme_Tarihi.Visible = false;
+            label4.Visible = false;
+            label6.Visible = false;
         }
     }
 }
