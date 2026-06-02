@@ -88,7 +88,6 @@ namespace SefimMusteriTakip
                     connection.Open();
                     string query = "";
                     SqlCommand command = new(query, connection);
-
                     if (rd_btn_Alici.Checked)
                     {
                         query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, Anydesk, SozlesmeTarihi) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @Anydesk, @SozlesmeTarihi)";
@@ -101,8 +100,7 @@ namespace SefimMusteriTakip
                         command.Parameters.AddWithValue("@SozlesmeTarihi", dtimepicker_Sozlesme_Tarihi.Text);
                         command.Parameters.AddWithValue("@CariTuru", "S");
                     }
-
-                    else
+                    else if (rd_btn_Satici.Checked)
                     {
                         query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, TCVKN, CariTuru) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @TCVKN, @CariTuru)";
                         command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
