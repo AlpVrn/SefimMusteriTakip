@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace SefimMusteriTakip
+namespace SefimMusteriTakip.DBCodes
 {
     public class SefimDbContext : DbContext
     {
