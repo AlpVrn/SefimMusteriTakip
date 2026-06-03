@@ -35,7 +35,7 @@ namespace SefimMusteriTakip
         {
             try
             {
-                using (var context = new SefimDbContext())
+                using (var context = new DBCodes.SefimDbContext())
                 {
                     var liste = context.Musteriler
                         .Where(m => m.Silindi == false && m.CariTuru == "S")
@@ -61,7 +61,7 @@ namespace SefimMusteriTakip
 
         public object SearchData()
         {
-            using (var context = new SefimDbContext()) {
+            using (var context = new DBCodes.SefimDbContext()) {
                 
                 
                 return null;
