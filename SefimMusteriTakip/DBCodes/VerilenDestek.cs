@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SefimMusteriTakip.DBCodes
 {
-    [Table("VerilenDestek")]
+    [Table("Verilen_Destek")]
     public class VerilenDestek
     {
         [Key]

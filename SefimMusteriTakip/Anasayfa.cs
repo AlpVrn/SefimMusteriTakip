@@ -41,7 +41,15 @@ namespace SefimMusteriTakip
 
         private void Anasayfa_Load(object sender, EventArgs e)
         {
-            this.Text = "";
+            if (string.IsNullOrEmpty(Properties.Settings.Default.KullaniciAdi))
+            {
+                GirisEkran girisEkran = new GirisEkran();
+                girisEkran.ShowDialog();
+            }
+            else
+            {
+                label2.Text = "Giriş Yapılan : " + Properties.Settings.Default.KullaniciAdi;
+            }
         }
     }
 }

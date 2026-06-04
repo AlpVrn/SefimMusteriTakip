@@ -1,5 +1,6 @@
-using System.Data;
 using Microsoft.Data.SqlClient;
+using SefimMusteriTakip.DBCodes;
+using System.Data;
 
 namespace SefimMusteriTakip
 {
@@ -11,24 +12,24 @@ namespace SefimMusteriTakip
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            //if (e.RowIndex >= 0)
-            //{
-            //    var durumValue = dataGridView1.Rows[e.RowIndex].Cells["Destek_Durumu"].Value;
+            if (e.RowIndex >= 0)
+            {
+                var durumValue = dataGridView1.Rows[e.RowIndex].Cells["Destek_Durumu"].Value;
 
-            //    if (durumValue != null)
-            //    {
-            //        string durum = durumValue.ToString();
+                if (durumValue != null)
+                {
+                    string durum = durumValue.ToString();
 
-            //        if (durum == "Destek Verilebilir")
-            //        {
-            //            e.CellStyle.BackColor = Color.LightGreen;
-            //        }
-            //        else if (durum == "Destek Verilemez")
-            //        {
-            //            e.CellStyle.BackColor = Color.MistyRose;
-            //        }
-            //    }
-            //}
+                    if (durum == "Destek Verilebilir")
+                    {
+                        e.CellStyle.BackColor = Color.LightGreen;
+                    }
+                    else if (durum == "Destek Verilemez")
+                    {
+                        e.CellStyle.BackColor = Color.MistyRose;
+                    }
+                }
+            }
         }
 
         public object LoadData()
@@ -59,40 +60,69 @@ namespace SefimMusteriTakip
             }
         }
 
-        public object SearchData()
+        public object SearchData(string Sirket)
         {
-            using (var context = new DBCodes.SefimDbContext()) {
-                
-                
-                return null;
+            try
+            {
+                using (var context = new DBCodes.SefimDbContext())
+                {
+                    string arananSirket = Sirket;
+
+                    var liste = context.Musteriler
+                            .Where(m => m.Silindi == false && m.CariTuru == "S" && m.Sirket.Contains(arananSirket))
+                            .Select(m => new {
+                                m.MusteriID,
+                                m.Sirket,
+                                m.Anydesk,
+                                SozlesmeTarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                                m.Ad,
+                                m.Adres,
+                                m.Telefon,
+                                Destek_Durumu = m.SozlesmeTarihi.HasValue && (DateTime.Now - m.SozlesmeTarihi.Value).TotalDays >= 365 ? "Destek Verilemez" : "Destek Verilebilir"
+                            })
+                            .ToList();
+                    return liste;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        //private void SearchData()
-        //{
-        //    try
-        //    {
-        //        using (SqlConnection connection = new SqlConnection(connectionString))
-        //        {
-        //            connection.Open();
+        public void VeriyiYapistir(int MusteriID,string Aciklama, DateTime OlusturmaTarihi,string DestekVerenKisi)
+        {
+            try
+            {
+                using (var context = new DBCodes.SefimDbContext())
+                {
 
-        //            string query = "SELECT MusteriID, Sirket,Anydesk,FORMAT(SozlesmeTarihi, 'dd/MM/yyyy') AS SozlesmeTarihi,Ad,Adres,Telefon, CASE WHEN DATEDIFF(year, SozlesmeTarihi, GETDATE()) >= 1 THEN 'Destek Verilemez' ELSE 'Destek Verilebilir' END AS Destek_Durumu FROM Musteriler WHERE Sirket LIKE @AramaMetni";
+                    VerilenDestek destek = new VerilenDestek
+                    {
 
-        //            SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
-        //            adapter.SelectCommand.Parameters.AddWithValue("@AramaMetni", "%" + txtbox_Ara.Text + "%");
-        //            DataTable dataTable = new();
-        //            adapter.Fill(dataTable);
+                        MusteriID = MusteriID,
+                        Aciklama = Aciklama,
+                        OlusturmaTarihi = OlusturmaTarihi,
+                        DestekVerenKisi = DestekVerenKisi,
+                    };
 
-        //            dataGridView1.DataSource = dataTable;
-        //            connection.Close();
-        //            dataGridView1.Columns[0].Visible = false;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //}
+                    context.VerilenDestekler.Add(destek);
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                string hataDetayi = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    hataDetayi += "\n\nDetay: " + ex.InnerException.Message;
+                }
+
+                MessageBox.Show("Veritabanı hatası: " + hataDetayi);
+            }
+
+        }
 
         private void InsertData()
         {
@@ -127,6 +157,7 @@ namespace SefimMusteriTakip
             txtbox_Anydesk.Text = "";
             txtBox_Ad.Text = "";
             txtbox_telNo.Text = "";
+            rtxtbox_VerilenDestek.Text = "";
         }
 
         public Form1()
@@ -158,7 +189,7 @@ namespace SefimMusteriTakip
         private void button1_Click(object sender, EventArgs e)
         {
             //SearchData();
-            MessageBox.Show("Test");
+            dataGridView1.DataSource = SearchData(txtbox_Ara.Text);
         }
 
         private void txtbox_Ara_TextChanged(object sender, EventArgs e)
@@ -170,15 +201,22 @@ namespace SefimMusteriTakip
             }
             else
             {
-                MessageBox.Show("Test");
-                //SearchData();
+                dataGridView1.DataSource = SearchData(txtbox_Ara.Text);
             }
         }
 
         private void btn_Destek_Click(object sender, EventArgs e)
         {
-            InsertData();
-            Clear();
+            if (txtbox_Sirket.Text == "")
+            {
+                MessageBox.Show("Lütfen Müşteri Seçiniz", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Clear();
+            }
+            else {
+                VeriyiYapistir(selectedMusteriID, rtxtbox_VerilenDestek.Text, DateTime.Now, Properties.Settings.Default.KullaniciAdi);
+                Clear();
+                MessageBox.Show("Destek Kaydı Eklenmiştir", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void btn_Temizle_Click(object sender, EventArgs e)
