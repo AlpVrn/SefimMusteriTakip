@@ -147,10 +147,10 @@
             // 
             // mtxtbox_TelNo
             // 
-            mtxtbox_TelNo.Location = new Point(953, 78);
+            mtxtbox_TelNo.Location = new Point(945, 78);
             mtxtbox_TelNo.Mask = "(999) 000-0000";
             mtxtbox_TelNo.Name = "mtxtbox_TelNo";
-            mtxtbox_TelNo.Size = new Size(116, 27);
+            mtxtbox_TelNo.Size = new Size(140, 27);
             mtxtbox_TelNo.TabIndex = 14;
             // 
             // mtxtbox_Anydesk
@@ -247,8 +247,9 @@
             // txt_VKNTC
             // 
             txt_VKNTC.Location = new Point(944, 48);
+            txt_VKNTC.MaxLength = 16;
             txt_VKNTC.Name = "txt_VKNTC";
-            txt_VKNTC.Size = new Size(125, 27);
+            txt_VKNTC.Size = new Size(141, 27);
             txt_VKNTC.TabIndex = 24;
             // 
             // label9

@@ -44,8 +44,8 @@ namespace SefimMusteriTakip
                             m.MusteriID,
                             m.Sirket,
                             m.Anydesk,
-                            SozlesmeTarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
-                            m.Ad,
+                            Sozlesme_Tarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                            Yetkili = m.Ad,
                             m.Adres,
                             m.Telefon,
                             Destek_Durumu = m.SozlesmeTarihi.HasValue && (DateTime.Now - m.SozlesmeTarihi.Value).TotalDays >= 365 ? "Destek Verilemez" : "Destek Verilebilir"
@@ -74,8 +74,8 @@ namespace SefimMusteriTakip
                                 m.MusteriID,
                                 m.Sirket,
                                 m.Anydesk,
-                                SozlesmeTarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
-                                m.Ad,
+                                Sozlesme_Tarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                                Yetkili = m.Ad,
                                 m.Adres,
                                 m.Telefon,
                                 Destek_Durumu = m.SozlesmeTarihi.HasValue && (DateTime.Now - m.SozlesmeTarihi.Value).TotalDays >= 365 ? "Destek Verilemez" : "Destek Verilebilir"
@@ -91,7 +91,7 @@ namespace SefimMusteriTakip
             }
         }
 
-        public void VeriyiYapistir(int MusteriID,string Aciklama, DateTime OlusturmaTarihi,string DestekVerenKisi)
+        public void InsertData(int MusteriID,string Aciklama, DateTime OlusturmaTarihi,string DestekVerenKisi)
         {
             try
             {
@@ -124,33 +124,6 @@ namespace SefimMusteriTakip
 
         }
 
-        private void InsertData()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = "INSERT INTO Verilen_Destek (MusteriID, Aciklama, DestekVerenKisi) VALUES (@MusteriID, @Aciklama, @DestekVerenKisi)";
-
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@MusteriID", selectedMusteriID);
-                    command.Parameters.AddWithValue("@Aciklama", rtxtbox_VerilenDestek.Text);
-                    command.Parameters.AddWithValue("@DestekVerenKisi", "yapılcak");         //buraya bak
-
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("Destek kaydı başarıyla eklendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    connection.Close();
-                    rtxtbox_VerilenDestek.Clear();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void Clear()
         {
             txtbox_Sirket.Text = "";
@@ -179,16 +152,15 @@ namespace SefimMusteriTakip
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            selectedMusteriID = Convert.ToInt32(dataGridView1.CurrentRow.Cells[0].Value ?? 0);
-            txtbox_Sirket.Text = dataGridView1.CurrentRow.Cells[1].Value?.ToString() ?? "";
-            txtbox_Anydesk.Text = dataGridView1.CurrentRow.Cells[2].Value?.ToString() ?? "";
-            txtBox_Ad.Text = dataGridView1.CurrentRow.Cells[4].Value?.ToString() ?? "";
-            txtbox_telNo.Text = dataGridView1.CurrentRow.Cells[6].Value?.ToString() ?? "";
+            selectedMusteriID = Convert.ToInt32(dataGridView1.CurrentRow.Cells["MusteriID"].Value ?? 0);
+            txtbox_Sirket.Text = dataGridView1.CurrentRow.Cells["Sirket"].Value?.ToString() ?? "";
+            txtbox_Anydesk.Text = dataGridView1.CurrentRow.Cells["Anydesk"].Value?.ToString() ?? "";
+            txtBox_Ad.Text = dataGridView1.CurrentRow.Cells["Yetkili"].Value?.ToString() ?? "";
+            txtbox_telNo.Text = dataGridView1.CurrentRow.Cells["Telefon"].Value?.ToString() ?? "";
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //SearchData();
             dataGridView1.DataSource = SearchData(txtbox_Ara.Text);
         }
 
@@ -213,8 +185,9 @@ namespace SefimMusteriTakip
                 Clear();
             }
             else {
-                VeriyiYapistir(selectedMusteriID, rtxtbox_VerilenDestek.Text, DateTime.Now, Properties.Settings.Default.KullaniciAdi);
+                InsertData(selectedMusteriID, rtxtbox_VerilenDestek.Text, DateTime.Now, Properties.Settings.Default.KullaniciAdi);
                 Clear();
+                LoadData();
                 MessageBox.Show("Destek Kaydı Eklenmiştir", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }

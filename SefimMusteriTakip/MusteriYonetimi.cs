@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
+using SefimMusteriTakip.DBCodes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
@@ -25,6 +27,7 @@ namespace SefimMusteriTakip
             rtxtbox_Adres.Text = "";
             mtxtbox_TelNo.Text = "";
             txtbox_mail.Text = "";
+            txt_VKNTC.Text = "";
         }
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -44,82 +47,115 @@ namespace SefimMusteriTakip
             }
         }
 
-        private void LoadData()
-        {
-            try
+
+        private object LoadData() {
+            using (var context = new DBCodes.SefimDbContext())
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                object liste = null;
+                try
                 {
-
-                    string query = "";
-
-
-                    connection.Open();
+                    
                     if (rd_btn_Alici.Checked)
                     {
-                        query = "SELECT MusteriID, Sirket,Anydesk,FORMAT(SozlesmeTarihi, 'dd/MM/yyyy') AS SozlesmeTarihi,Ad,Adres,Telefon,Email,KayitTarihi, CASE WHEN DATEDIFF(year, SozlesmeTarihi, GETDATE()) >= 1 THEN 'Destek Verilemez' ELSE 'Destek Verilebilir' END AS Destek_Durumu FROM Musteriler WHERE Silindi = 0 AND CariTuru = 'S'";
-                    }
-                    else
-                    {
-                        query = "SELECT MusteriID,Sirket,Ad,TCVKN,Adres,Telefon,Email,KayitTarihi FROM Musteriler WHERE CariTuru = 'A' AND Silindi = 0";
-                    }
+                        liste = context.Musteriler
+                        .Where(m => m.Silindi == false && m.CariTuru == "A")
+                        .Select(m => new
+                        {
+                            m.MusteriID,
+                            m.Sirket,
+                            Yetkili = m.Ad,
+                            m.Anydesk,
+                            Sozlesme_Tarihi =  m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                            m.Adres,
+                            TC_VKN = m.TCVKN,
+                            m.Telefon,
+                            m.Email,
+                            Kayit_Tarihi = m.KayitTarihi,
+                            Destek_Durumu = m.SozlesmeTarihi.HasValue && (DateTime.Now - m.SozlesmeTarihi.Value).TotalDays >= 365 ? "Destek Verilemez" : "Destek Verilebilir"
+                        }).ToList();
 
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
-                    DataTable dataTable = new();
-                    adapter.Fill(dataTable);
-
-                    dataGridView1.DataSource = dataTable;
-                    dataGridView1.Columns[0].Visible = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void InsertData()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    string query = "";
-                    SqlCommand command = new(query, connection);
-                    if (rd_btn_Alici.Checked)
-                    {
-                        query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, Anydesk, SozlesmeTarihi) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @Anydesk, @SozlesmeTarihi)";
-                        command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
-                        command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
-                        command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
-                        command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
-                        command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
-                        command.Parameters.AddWithValue("@Anydesk", mtxtbox_Anydesk.Text);
-                        command.Parameters.AddWithValue("@SozlesmeTarihi", dtimepicker_Sozlesme_Tarihi.Text);
-                        command.Parameters.AddWithValue("@CariTuru", "S");
                     }
                     else if (rd_btn_Satici.Checked)
                     {
-                        query = "INSERT INTO Musteriler (Ad, Sirket, Email, Telefon, Adres, TCVKN, CariTuru) VALUES (@Ad, @Sirket, @Email, @Telefon, @Adres, @TCVKN, @CariTuru)";
-                        command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
-                        command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
-                        command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
-                        command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
-                        command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
-                        command.Parameters.AddWithValue("@TCVKN", txt_VKNTC.Text);
-                        command.Parameters.AddWithValue("@CariTuru", "A");
+                        liste = context.Musteriler
+                        .Where(m => m.Silindi == false && m.CariTuru == "S")
+                        .Select(m => new
+                        {
+                            m.MusteriID,
+                            m.Sirket,
+                            Yetkili = m.Ad,
+                            TC_VKN = m.TCVKN,
+                            m.Adres,
+                            m.Telefon,
+                            m.Email,
+                            Kayit_Tarihi = m.KayitTarihi
+                        }).ToList();
                     }
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("Cari Eklendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    connection.Close();
+                    return liste;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+                
+            }
+            
+        }
+
+
+        public void InsertData(string Ad, string Sirket, string Email, string Telefon, string Adres, string Anydesk, DateTime SozlesmeTarihi, string TCVKN)
+        {
+            try
+            {
+                using (var context = new DBCodes.SefimDbContext())
+                {
+                    Musteri Musteriler = null;
+                    if (rd_btn_Alici.Checked)
+                    {
+                        Musteriler = new Musteri
+                        {
+                            Ad = Ad,
+                            Sirket = Sirket,
+                            Email = Email,
+                            Telefon = Telefon,
+                            Adres = Adres,
+                            Anydesk = Anydesk,
+                            SozlesmeTarihi = SozlesmeTarihi,
+                            CariTuru = "A",
+                            TCVKN = TCVKN
+                        };
+                    }
+                    else if (rd_btn_Satici.Checked)
+                    {
+                        Musteriler = new Musteri
+                        {
+                            Ad = Ad,
+                            Sirket = Sirket,
+                            Email = Email,
+                            Telefon = Telefon,
+                            Adres = Adres,
+                            CariTuru = "S",
+                            TCVKN = TCVKN
+                        };
+                    }
+
+                    context.Musteriler.Add(Musteriler);
+                    context.SaveChanges();
+                    MessageBox.Show("Cari eklendi","Uyarı",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Hata: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string hataDetayi = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    hataDetayi += "\n\nDetay: " + ex.InnerException.Message;
+                }
+
+                MessageBox.Show("Veritabanı hatası: " + hataDetayi);
             }
+
         }
 
         private void UpdateData()
@@ -190,19 +226,32 @@ namespace SefimMusteriTakip
 
         private void MusteriYonetimi_Load(object sender, EventArgs e)
         {
-            LoadData();
+            dataGridView1.DataSource = LoadData();
             timer1.Start();
+            dataGridView1.Columns["MusteriID"].Visible = false;
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            txtbox_SirketAdi.Text = dataGridView1.CurrentRow.Cells[1].Value?.ToString() ?? "";
-            mtxtbox_Anydesk.Text = dataGridView1.CurrentRow.Cells[2].Value?.ToString() ?? "";
-            dtimepicker_Sozlesme_Tarihi.Text = dataGridView1.CurrentRow.Cells[3].Value?.ToString() ?? "";
-            txtbox_SirketSahipAd.Text = dataGridView1.CurrentRow.Cells[4].Value?.ToString() ?? "";
-            rtxtbox_Adres.Text = dataGridView1.CurrentRow.Cells[5].Value?.ToString() ?? "";
-            mtxtbox_TelNo.Text = dataGridView1.CurrentRow.Cells[6].Value?.ToString() ?? "";
-            txtbox_mail.Text = dataGridView1.CurrentRow.Cells[7].Value?.ToString() ?? "";
+            if (rd_btn_Alici.Checked)
+            {
+                txtbox_SirketAdi.Text = dataGridView1.CurrentRow.Cells["Sirket"].Value?.ToString() ?? "";
+                mtxtbox_Anydesk.Text = dataGridView1.CurrentRow.Cells["Anydesk"].Value?.ToString() ?? "";
+                dtimepicker_Sozlesme_Tarihi.Text = dataGridView1.CurrentRow.Cells["Sozlesme_Tarihi"].Value?.ToString() ?? "";
+                txtbox_SirketSahipAd.Text = dataGridView1.CurrentRow.Cells["Yetkili"].Value?.ToString() ?? "";
+                rtxtbox_Adres.Text = dataGridView1.CurrentRow.Cells["Adres"].Value?.ToString() ?? "";
+                mtxtbox_TelNo.Text = dataGridView1.CurrentRow.Cells["Telefon"].Value?.ToString() ?? "";
+                txtbox_mail.Text = dataGridView1.CurrentRow.Cells["Email"].Value?.ToString() ?? "";
+                txt_VKNTC.Text = dataGridView1.CurrentRow.Cells["TC_VKN"].Value?.ToString() ?? "";
+            }
+            else {
+                txtbox_SirketAdi.Text = dataGridView1.CurrentRow.Cells["Sirket"].Value?.ToString() ?? "";
+                txtbox_SirketSahipAd.Text = dataGridView1.CurrentRow.Cells["Yetkili"].Value?.ToString() ?? "";
+                rtxtbox_Adres.Text = dataGridView1.CurrentRow.Cells["Adres"].Value?.ToString() ?? "";
+                mtxtbox_TelNo.Text = dataGridView1.CurrentRow.Cells["Telefon"].Value?.ToString() ?? "";
+                txtbox_mail.Text = dataGridView1.CurrentRow.Cells["Email"].Value?.ToString() ?? "";
+                txt_VKNTC.Text = dataGridView1.CurrentRow.Cells["TC_VKN"].Value?.ToString() ?? "";
+            }
         }
 
         private void btn_Temizle_Click(object sender, EventArgs e)
@@ -217,43 +266,37 @@ namespace SefimMusteriTakip
 
         private void btn_Ekle_Click(object sender, EventArgs e)
         {
-            InsertData();
+            InsertData(txtbox_SirketSahipAd.Text,txtbox_SirketAdi.Text,txtbox_mail.Text,mtxtbox_TelNo.Text,rtxtbox_Adres.Text,mtxtbox_Anydesk.Text,dtimepicker_Sozlesme_Tarihi.Value,txt_VKNTC.Text);
             ClearDataText();
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
 
         private void btn_Sil_Click(object sender, EventArgs e)
         {
             DeleteData();
             ClearDataText();
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
 
         private void btn_Guncelle_Click(object sender, EventArgs e)
         {
             UpdateData();
             ClearDataText();
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
 
         private void rd_btn_Alici_CheckedChanged(object sender, EventArgs e)
         {
-            if (rd_btn_Alici.Checked)
-            {
-                LoadData();
-                mtxtbox_Anydesk.Visible = true;
-                dtimepicker_Sozlesme_Tarihi.Visible = true;
-                label4.Visible = true;
-                label6.Visible = true;
-            }
-            else
-            {
-                LoadData();
-            }
+            dataGridView1.DataSource = LoadData();
+            mtxtbox_Anydesk.Visible = true;
+            dtimepicker_Sozlesme_Tarihi.Visible = true;
+            label4.Visible = true;
+            label6.Visible = true;
         }
 
         private void rd_btn_Satici_CheckedChanged(object sender, EventArgs e)
         {
+            dataGridView1.DataSource = LoadData();
             mtxtbox_Anydesk.Visible = false;
             dtimepicker_Sozlesme_Tarihi.Visible = false;
             label4.Visible = false;

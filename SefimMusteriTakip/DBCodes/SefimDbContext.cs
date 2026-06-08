@@ -6,6 +6,7 @@ namespace SefimMusteriTakip.DBCodes
     {
         public DbSet<Musteri> Musteriler { get; set; }
         public DbSet<VerilenDestek> VerilenDestekler { get; set; }
+        public DbSet<FrmNotlar> FrmNotlars { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
