@@ -7,7 +7,6 @@ namespace SefimMusteriTakip
 
     public partial class Form1 : Form
     {
-        private string connectionString = @"Server=ALP\ALP;Database=SefimMusteriTakip;User Id=sa;Password=vega1234;Encrypt=false;TrustServerCertificate=true;";
         private int selectedMusteriID = 0;
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using SefimMusteriTakip.DBCodes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,42 +13,22 @@ namespace SefimMusteriTakip
     public partial class RaporForm : Form
     {
 
-        private string connectionString = @"Server=ALP\ALP;Database=SefimMusteriTakip;User Id=sa;Password=vega1234;Encrypt=false;TrustServerCertificate=true;";
-
-        private void LoadData()
+        private object LoadData()
         {
-            try
+            using (var context = new DBCodes.SefimDbContext())
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
+                object liste = null;
 
-                    string query = "SELECT MusteriID, Sirket, Anydesk, FORMAT(SozlesmeTarihi, 'dd/MM/yyyy') AS SozlesmeTarihi, Ad, Adres, Telefon, Email, FORMAT(KayitTarihi, 'dd/MM/yyyy') AS KayitTarihi " +
-                                   "FROM Musteriler WHERE CAST(KayitTarihi AS DATE) = @Tarih";
-
-                    SqlCommand command = new SqlCommand(query, connection);
-
-                    command.Parameters.AddWithValue("@Tarih", dateTimePicker1.Value.Date);
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(command);
-
-                    DataTable dataTable = new DataTable();
-                    adapter.Fill(dataTable);
-
-                    dataGridView1.DataSource = dataTable;
-
-                    if (dataGridView1.Columns.Count > 0)
-                        dataGridView1.Columns[0].Visible = false;
-                    
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                liste = context.VerilenDestekler
+                .Where(m => m.OlusturmaTarihi.Date == dateTimePicker1.Value.Date)
+                .Select(m => new {
+                m.Musterisi.Sirket,
+                m.Aciklama,
+                m.DestekVerenKisi
+                }).ToList();
+                return liste;
             }
         }
-
 
         public RaporForm()
         {
@@ -57,9 +38,9 @@ namespace SefimMusteriTakip
         private void RaporForm_Load(object sender, EventArgs e)
         {
             dateTimePicker1.Value = DateTime.Now;
+            dataGridView1.DataSource = LoadData();
             timer1.Start();
             this.Text = "Günlük Rapor";
-            LoadData();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -71,19 +52,19 @@ namespace SefimMusteriTakip
         {
             DateTime yeniTarih = dateTimePicker1.Value.AddDays(-1);
             dateTimePicker1.Value = yeniTarih;
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
 
         private void btn_ileri_Click(object sender, EventArgs e)
         {
             DateTime yeniTarih = dateTimePicker1.Value.AddDays(+1);
             dateTimePicker1.Value = yeniTarih;
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            LoadData();
+            dataGridView1.DataSource = LoadData();
         }
     }
 }

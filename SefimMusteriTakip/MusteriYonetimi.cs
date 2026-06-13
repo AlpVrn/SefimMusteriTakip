@@ -15,9 +15,6 @@ namespace SefimMusteriTakip
 {
     public partial class MusteriYonetimi : Form
     {
-
-        private string connectionString = @"Server=ALP\ALP;Database=SefimMusteriTakip;User Id=sa;Password=vega1234;Encrypt=false;TrustServerCertificate=true;";
-
         private void ClearDataText()
         {
             txtbox_SirketAdi.Text = "";
@@ -48,13 +45,14 @@ namespace SefimMusteriTakip
         }
 
 
-        private object LoadData() {
+        private object LoadData()
+        {
             using (var context = new DBCodes.SefimDbContext())
             {
                 object liste = null;
                 try
                 {
-                    
+
                     if (rd_btn_Alici.Checked)
                     {
                         liste = context.Musteriler
@@ -65,7 +63,7 @@ namespace SefimMusteriTakip
                             m.Sirket,
                             Yetkili = m.Ad,
                             m.Anydesk,
-                            Sozlesme_Tarihi =  m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                            Sozlesme_Tarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
                             m.Adres,
                             TC_VKN = m.TCVKN,
                             m.Telefon,
@@ -98,9 +96,67 @@ namespace SefimMusteriTakip
                     MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
-                
+
             }
-            
+
+        }
+
+
+
+        private object SearchData()
+        {
+            using (var context = new DBCodes.SefimDbContext())
+            {
+                object liste = null;
+                try
+                {
+
+                    if (rd_btn_Alici.Checked)
+                    {
+                        liste = context.Musteriler
+                        .Where(m => m.Silindi == false && m.CariTuru == "A" && m.Sirket.Contains(txt_SirketAra.Text))
+                        .Select(m => new
+                        {
+                            m.MusteriID,
+                            m.Sirket,
+                            Yetkili = m.Ad,
+                            m.Anydesk,
+                            Sozlesme_Tarihi = m.SozlesmeTarihi.HasValue ? m.SozlesmeTarihi.Value.ToString("dd/MM/yyyy") : "",
+                            m.Adres,
+                            TC_VKN = m.TCVKN,
+                            m.Telefon,
+                            m.Email,
+                            Kayit_Tarihi = m.KayitTarihi,
+                            Destek_Durumu = m.SozlesmeTarihi.HasValue && (DateTime.Now - m.SozlesmeTarihi.Value).TotalDays >= 365 ? "Destek Verilemez" : "Destek Verilebilir"
+                        }).ToList();
+
+                    }
+                    else if (rd_btn_Satici.Checked)
+                    {
+                        liste = context.Musteriler
+                        .Where(m => m.Silindi == false && m.CariTuru == "S" && m.Sirket.Contains(txt_SirketAra.Text))
+                        .Select(m => new
+                        {
+                            m.MusteriID,
+                            m.Sirket,
+                            Yetkili = m.Ad,
+                            TC_VKN = m.TCVKN,
+                            m.Adres,
+                            m.Telefon,
+                            m.Email,
+                            Kayit_Tarihi = m.KayitTarihi
+                        }).ToList();
+                    }
+                    return liste;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Veritabanı bağlantı hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+
+            }
+
         }
 
 
@@ -142,7 +198,7 @@ namespace SefimMusteriTakip
 
                     context.Musteriler.Add(Musteriler);
                     context.SaveChanges();
-                    MessageBox.Show("Cari eklendi","Uyarı",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    MessageBox.Show("Cari eklendi", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -158,36 +214,42 @@ namespace SefimMusteriTakip
 
         }
 
-        private void UpdateData()
+
+
+        private void UpdateData(string Ad, string Sirket, string Email, string Telefon, string Adres, string Anydesk, DateTime Sozlesme_Tarihi, string TCVKN)
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var context = new DBCodes.SefimDbContext())
                 {
-                    connection.Open();
+                    int SeciliMusteriID = Convert.ToInt16(dataGridView1.CurrentRow.Cells["MusteriID"].Value);
+                    var secilenID = context.Musteriler.FirstOrDefault(m => m.MusteriID == SeciliMusteriID);
+                    Musteri Musteriler = secilenID;
 
-                    string query = "UPDATE Musteriler SET " +
-                    "Ad = @Ad, " +
-                    "Sirket = @Sirket, " +
-                    "Email = @Email, " +
-                    "Telefon = @Telefon, " +
-                    "Adres = @Adres, " +
-                    "Anydesk = @Anydesk, " +
-                    "SozlesmeTarihi = @SozlesmeTarihi " +
-                    "WHERE MusteriID = @ID";
+                    if (rd_btn_Alici.Checked)
+                    {
+                        Musteriler.Ad = Ad;
+                        Musteriler.Sirket = Sirket;
+                        Musteriler.Email = Email;
+                        Musteriler.Telefon = Telefon;
+                        Musteriler.Adres = Adres;
+                        Musteriler.Anydesk = Anydesk;
+                        Musteriler.SozlesmeTarihi = Sozlesme_Tarihi;
+                        Musteriler.TCVKN = TCVKN;
+                    }
 
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@ID", dataGridView1.CurrentRow.Cells[0]?.Value ?? "0");
-                    command.Parameters.AddWithValue("@Ad", txtbox_SirketSahipAd.Text);
-                    command.Parameters.AddWithValue("@Sirket", txtbox_SirketAdi.Text);
-                    command.Parameters.AddWithValue("@Email", txtbox_mail.Text);
-                    command.Parameters.AddWithValue("@Telefon", mtxtbox_TelNo.Text);
-                    command.Parameters.AddWithValue("@Adres", rtxtbox_Adres.Text);
-                    command.Parameters.AddWithValue("@Anydesk", mtxtbox_Anydesk.Text);
-                    command.Parameters.AddWithValue("@SozlesmeTarihi", dtimepicker_Sozlesme_Tarihi.Text);
-                    command.ExecuteNonQuery();
+                    else if (rd_btn_Satici.Checked)
+                    {
+                        Musteriler.Ad = Ad;
+                        Musteriler.Sirket = Sirket;
+                        Musteriler.Email = Email;
+                        Musteriler.Telefon = Telefon;
+                        Musteriler.Adres = Adres;
+                        Musteriler.TCVKN = TCVKN;
+                    }
+
+                    context.SaveChanges();
                     MessageBox.Show("Müşteri Güncellendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    connection.Close();
                 }
             }
             catch (Exception ex)
@@ -196,20 +258,21 @@ namespace SefimMusteriTakip
             }
         }
 
+
+
         private void DeleteData()
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var context = new DBCodes.SefimDbContext())
                 {
-                    connection.Open();
+                    int SeciliMusteriID = Convert.ToInt16(dataGridView1.CurrentRow.Cells["MusteriID"].Value);
+                    var secilenID = context.Musteriler.FirstOrDefault(m => m.MusteriID == SeciliMusteriID);
 
-                    string query = "UPDATE Musteriler SET Silindi = 1 WHERE MusteriID = @ID";
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@ID", dataGridView1.CurrentRow.Cells[0].Value.ToString());
-                    command.ExecuteNonQuery();
+                    Musteri Musteriler = secilenID;
+                    Musteriler.Silindi = true;
                     MessageBox.Show("Müşteri Silindi", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    connection.Close();
+                    context.SaveChanges();
                 }
             }
             catch (Exception ex)
@@ -244,7 +307,8 @@ namespace SefimMusteriTakip
                 txtbox_mail.Text = dataGridView1.CurrentRow.Cells["Email"].Value?.ToString() ?? "";
                 txt_VKNTC.Text = dataGridView1.CurrentRow.Cells["TC_VKN"].Value?.ToString() ?? "";
             }
-            else {
+            else
+            {
                 txtbox_SirketAdi.Text = dataGridView1.CurrentRow.Cells["Sirket"].Value?.ToString() ?? "";
                 txtbox_SirketSahipAd.Text = dataGridView1.CurrentRow.Cells["Yetkili"].Value?.ToString() ?? "";
                 rtxtbox_Adres.Text = dataGridView1.CurrentRow.Cells["Adres"].Value?.ToString() ?? "";
@@ -266,7 +330,7 @@ namespace SefimMusteriTakip
 
         private void btn_Ekle_Click(object sender, EventArgs e)
         {
-            InsertData(txtbox_SirketSahipAd.Text,txtbox_SirketAdi.Text,txtbox_mail.Text,mtxtbox_TelNo.Text,rtxtbox_Adres.Text,mtxtbox_Anydesk.Text,dtimepicker_Sozlesme_Tarihi.Value,txt_VKNTC.Text);
+            InsertData(txtbox_SirketSahipAd.Text, txtbox_SirketAdi.Text, txtbox_mail.Text, mtxtbox_TelNo.Text, rtxtbox_Adres.Text, mtxtbox_Anydesk.Text, dtimepicker_Sozlesme_Tarihi.Value, txt_VKNTC.Text);
             ClearDataText();
             dataGridView1.DataSource = LoadData();
         }
@@ -280,9 +344,9 @@ namespace SefimMusteriTakip
 
         private void btn_Guncelle_Click(object sender, EventArgs e)
         {
-            UpdateData();
-            ClearDataText();
+            UpdateData(txtbox_SirketSahipAd.Text, txtbox_SirketAdi.Text, txtbox_mail.Text, mtxtbox_TelNo.Text, rtxtbox_Adres.Text, mtxtbox_Anydesk.Text, dtimepicker_Sozlesme_Tarihi.Value, txt_VKNTC.Text);
             dataGridView1.DataSource = LoadData();
+            ClearDataText();
         }
 
         private void rd_btn_Alici_CheckedChanged(object sender, EventArgs e)
@@ -301,6 +365,11 @@ namespace SefimMusteriTakip
             dtimepicker_Sozlesme_Tarihi.Visible = false;
             label4.Visible = false;
             label6.Visible = false;
+        }
+
+        private void txt_SirketAra_TextChanged(object sender, EventArgs e)
+        {
+            dataGridView1.DataSource = SearchData();
         }
     }
 }

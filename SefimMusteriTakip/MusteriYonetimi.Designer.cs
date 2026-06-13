@@ -55,7 +55,7 @@
             groupBox1 = new GroupBox();
             rd_btn_Satici = new RadioButton();
             rd_btn_Alici = new RadioButton();
-            textBox2 = new TextBox();
+            txt_SirketAra = new TextBox();
             label10 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             groupBox1.SuspendLayout();
@@ -296,12 +296,13 @@
             rd_btn_Alici.UseVisualStyleBackColor = true;
             rd_btn_Alici.CheckedChanged += rd_btn_Alici_CheckedChanged;
             // 
-            // textBox2
+            // txt_SirketAra
             // 
-            textBox2.Location = new Point(500, 350);
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(244, 27);
-            textBox2.TabIndex = 26;
+            txt_SirketAra.Location = new Point(500, 350);
+            txt_SirketAra.Name = "txt_SirketAra";
+            txt_SirketAra.Size = new Size(244, 27);
+            txt_SirketAra.TabIndex = 26;
+            txt_SirketAra.TextChanged += txt_SirketAra_TextChanged;
             // 
             // label10
             // 
@@ -319,7 +320,7 @@
             AutoSize = true;
             ClientSize = new Size(1138, 696);
             Controls.Add(label10);
-            Controls.Add(textBox2);
+            Controls.Add(txt_SirketAra);
             Controls.Add(groupBox1);
             Controls.Add(label9);
             Controls.Add(txt_VKNTC);
@@ -384,7 +385,7 @@
         private GroupBox groupBox1;
         private RadioButton rd_btn_Satici;
         private RadioButton rd_btn_Alici;
-        private TextBox textBox2;
+        private TextBox txt_SirketAra;
         private Label label10;
     }
 }
