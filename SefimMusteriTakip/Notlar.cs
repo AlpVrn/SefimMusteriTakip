@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using SefimMusteriTakip.DBCodes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,51 +12,54 @@ namespace SefimMusteriTakip
 {
     public partial class Notlar : Form
     {
-        private string connectionString = @"Server=ALP\ALP;Database=SefimMusteriTakip;User Id=sa;Password=vega1234;Encrypt=false;TrustServerCertificate=true;";
-
-
-
+        
         private void ClearTextData()
         {
             rtxtNotMetni.Text = "";
             dtpNotEkleme.Value = DateTime.Now;
         }
 
+
+
         private void InsertNote(string notMetni, DateTime notTarihi)
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var context = new DBCodes.SefimDbContext())
                 {
-                    connection.Open();
-                    string query = "INSERT INTO FrmNotlar (NotMetni, NotTarihi, YapildiMi) VALUES (@NotMetni, @NotTarihi, 0)";
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@NotMetni", notMetni);
-                    command.Parameters.AddWithValue("@NotTarihi", notTarihi);
-                    command.ExecuteNonQuery();
+
+                    var newNote = new FrmNotlar
+                    {
+                        NotMetni = notMetni,
+                        NotTarihi = notTarihi,
+                        YapildiMi = false
+                    };
+                    context.FrmNotlars.Add(newNote);
+                    context.SaveChanges();
+                    MessageBox.Show("Not Eklendi","Başarılı",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Not ekleme hatası: " + ex.Message);
             }
+
         }
 
 
-
-
-        private void UpdateNoteStatus(int id, bool durum)
+        private void UpdateNoteStatus(int notID, bool yapildiMi)
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var context = new DBCodes.SefimDbContext())
                 {
-                    connection.Open();
-                    string query = "UPDATE FrmNotlar SET YapildiMi = @Durum WHERE NotID = @ID";
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@Durum", durum);
-                    command.Parameters.AddWithValue("@ID", id);
-                    command.ExecuteNonQuery();
+                    int SeciliNot = notID;
+                    var secilenID = context.FrmNotlars.FirstOrDefault(m => m.NotID == SeciliNot);
+                    DBCodes.FrmNotlar Nots = secilenID;
+                    
+                    Nots.YapildiMi = yapildiMi;
+
+                    context.SaveChanges();
                 }
             }
             catch (Exception ex)
@@ -63,6 +67,7 @@ namespace SefimMusteriTakip
                 MessageBox.Show("Güncelleme hatası: " + ex.Message);
             }
         }
+
 
         private void LoadNotesAsCards(DateTime secilenTarih)
         {
@@ -74,20 +79,16 @@ namespace SefimMusteriTakip
                 flpNotlar.WrapContents = false;
                 flpNotlar.AutoScroll = true;
 
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var context = new DBCodes.SefimDbContext())
                 {
-                    connection.Open();
-                    string query = "SELECT NotID, YapildiMi, NotMetni FROM FrmNotlar WHERE NotTarihi = @Tarih";
-                    SqlCommand command = new(query, connection);
-                    command.Parameters.AddWithValue("@Tarih", secilenTarih);
+                    var liste = context.FrmNotlars.Where(n => n.NotTarihi == secilenTarih).ToList();
 
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
+
+                        foreach (var not in liste)
                         {
-                            int notID = reader.GetInt32(0);
-                            bool yapildiMi = reader.GetBoolean(1);
-                            string notMetni = reader.GetString(2);
+                            int notID = not.NotID ?? 0;
+                            bool yapildiMi = not.YapildiMi ?? false;
+                            string notMetni = not.NotMetni ?? "Not Yüklenemedi!";
 
                             Panel card = new Panel();
                             card.Width = 385;
@@ -134,7 +135,6 @@ namespace SefimMusteriTakip
 
                             flpNotlar.Controls.Add(card);
                         }
-                    }
                 }
             }
             catch (Exception ex)
